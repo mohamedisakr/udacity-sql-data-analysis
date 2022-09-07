@@ -238,15 +238,36 @@
 -- the region name, the channel, and the number of occurrences. 
 -- Order your table with the highest number of occurrences first.
 
-SELECT r.name region_name, w.channel, COUNT(*) num_events
-FROM accounts a JOIN web_events w
-	ON a.id = w.account_id
-JOIN sales_reps s
-	ON s.id = a.sales_rep_id
-JOIN region r 
-	ON s.region_id = r.id
-GROUP BY r.name, w.channel
-ORDER BY num_events DESC;
+-- SELECT r.name region_name, w.channel, COUNT(*) num_events
+-- FROM accounts a JOIN web_events w
+-- 	ON a.id = w.account_id
+-- JOIN sales_reps s
+-- 	ON s.id = a.sales_rep_id
+-- JOIN region r 
+-- 	ON s.region_id = r.id
+-- GROUP BY r.name, w.channel
+-- ORDER BY num_events DESC;
+
+-- 20. Quiz: DISTINCT
+
+-- Q 1 : Use DISTINCT to test if there are any accounts associated with more than one region.
+-- SELECT DISTINCT r.name region_name, a.name account_name
+-- FROM accounts a JOIN sales_reps s
+-- 	ON s.id = a.sales_rep_id
+-- JOIN region r 
+-- 	ON s.region_id = r.id
+-- -- GROUP BY r.name, w.channel
+-- ORDER BY region_name DESC;
+
+-- SELECT DISTINCT id, name
+-- FROM accounts;
+
+-- Q 2 : Have any sales reps worked on more than one account?
+SELECT DISTINCT id, name
+FROM sales_reps;
+
+
+
 
 
 
