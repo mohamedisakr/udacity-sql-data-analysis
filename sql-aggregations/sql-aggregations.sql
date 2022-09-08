@@ -519,17 +519,17 @@
 -- Place the top sales people based on dollar amount of sales first in your final table. 
 -- You might see a few upset sales people by this criteria!
 
-SELECT s.name, count(o.id) total_number_orders, SUM(total_amt_usd) total_sales_across_all_orders, 
-			CASE WHEN count(o.id) >= 200 OR SUM(total_amt_usd) >= 750000 THEN 'top'
-				 WHEN (count(o.id) < 200 AND count(o.id) > 150) OR (SUM(total_amt_usd) < 750000 AND SUM(total_amt_usd) > 500000) THEN 'middle'
-				ELSE 'low'
-			END AS top_performing_sales_rep_level
-FROM accounts a JOIN sales_reps s
-	ON a.sales_rep_id = s.id
-JOIN orders o 
-	ON a.id = o.account_id
-GROUP BY 1 --s.name	
-ORDER BY 3 DESC
+-- SELECT s.name, count(o.id) total_number_orders, SUM(total_amt_usd) total_sales_across_all_orders, 
+-- 			CASE WHEN count(o.id) >= 200 OR SUM(total_amt_usd) >= 750000 THEN 'top'
+-- 				 WHEN (count(o.id) < 200 AND count(o.id) > 150) OR (SUM(total_amt_usd) < 750000 AND SUM(total_amt_usd) > 500000) THEN 'middle'
+-- 				ELSE 'low'
+-- 			END AS top_performing_sales_rep_level
+-- FROM accounts a JOIN sales_reps s
+-- 	ON a.sales_rep_id = s.id
+-- JOIN orders o 
+-- 	ON a.id = o.account_id
+-- GROUP BY 1 --s.name	
+-- ORDER BY 3 DESC
 
 -- SELECT s.name, COUNT(*) total_number_orders, SUM(o.total_amt_usd) total_spent, 
 --         CASE WHEN COUNT(*) > 200 OR SUM(o.total_amt_usd) > 750000 THEN 'top'
