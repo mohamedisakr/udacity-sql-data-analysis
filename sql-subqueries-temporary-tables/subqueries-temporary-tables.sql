@@ -212,13 +212,164 @@
 --                                   FROM orders o)
 							   
 -- Finally, we just want the average of these values.
-SELECT AVG(avg_amt)
-FROM (SELECT o.account_id, AVG(o.total_amt_usd) avg_amt
-       FROM orders o
-       GROUP BY 1
-       HAVING AVG(o.total_amt_usd) > (SELECT AVG(o.total_amt_usd) avg_all
-                                      FROM orders o)) temp_table;
+-- SELECT AVG(avg_amt)
+-- FROM (SELECT o.account_id, AVG(o.total_amt_usd) avg_amt
+--        FROM orders o
+--        GROUP BY 1
+--        HAVING AVG(o.total_amt_usd) > (SELECT AVG(o.total_amt_usd) avg_all
+--                                       FROM orders o)) temp_table;
 
+
+-- Your First WITH (CTE)
+-- The same question as you saw in your first subquery is provided here along with the solution.
+
+-- QUESTION: You need to find the average number of events for each channel per day.
+
+-- SOLUTION:
+
+-- WITH number_events_each_channel_per_day AS
+-- (
+-- 	SELECT DATE_TRUNC('day',occurred_at) AS day, channel, COUNT(*) as events
+--     FROM web_events 
+--     GROUP BY 1,2
+-- )
+
+-- SELECT channel, AVG(events) AS average_events
+-- FROM number_events_each_channel_per_day
+-- GROUP BY channel
+-- ORDER BY 2 DESC;
+
+-----------------------------------------
+-- Quiz: WITH Quizzes
+-----------------------------------------
+
+-- Q 1 : Provide the name of the sales_rep in each region with the largest amount of total_amt_usd sales.
+-- WITH total_amt_sales AS 
+-- (
+-- 	SELECT s.name sales_rep_name, r.name region_name, SUM(o.total_amt_usd) total_amt
+-- 	FROM sales_reps s JOIN region r
+-- 		ON s.region_id = r.id
+-- 	JOIN accounts a 
+-- 		ON a.sales_rep_id = s.id
+-- 	JOIN orders o 
+-- 		ON o.account_id = a.id
+-- 	GROUP BY 1, 2
+-- )
+
+-- SELECT region_name, MAX(total_amt) max_total_amt
+-- FROM total_amt_sales
+-- GROUP BY 1
+-- ORDER BY 2 DESC
+	
+-- Q 2 : For the region with the largest (sum) of sales total_amt_usd, how many total (count) orders were placed?
+-- WITH most_inner AS
+-- (
+-- 	SELECT r.name region_name, SUM(o.total_amt_usd) total_amt
+-- 	FROM sales_reps s JOIN accounts a
+-- 		ON a.sales_rep_id = s.id
+-- 	JOIN orders o
+-- 		ON o.account_id = a.id
+-- 	JOIN region r
+-- 		ON r.id = s.region_id
+-- 	GROUP BY r.name
+-- )
+
+-- SELECT r.name, COUNT(o.total) total_orders
+-- FROM sales_reps s JOIN accounts a
+-- 	ON a.sales_rep_id = s.id
+-- JOIN orders o	
+-- 	ON o.account_id = a.id
+-- JOIN region r
+-- 	ON r.id = s.region_id
+-- GROUP BY r.name
+-- HAVING SUM(o.total_amt_usd) = (SELECT MAX(total_amt) FROM most_inner)
+
+
+-- Q 3 : How many accounts had more total purchases than the account name which has bought 
+-- the most standard_qty paper throughout their lifetime as a customer?
+/*
+WITH inner_tab AS 
+(
+	SELECT a.name act_name, SUM(o.standard_qty) tot_std, SUM(o.total) total
+	FROM accounts a JOIN orders o
+		ON o.account_id = a.id
+	GROUP BY 1
+	ORDER BY 2 DESC
+	LIMIT 1
+),
+
+ counter_tab AS
+(
+	SELECT a.name
+	FROM orders o JOIN accounts a
+		ON a.id = o.account_id
+	GROUP BY 1
+	HAVING SUM(o.total) > (SELECT total FROM inner_tab)                
+)
+
+SELECT COUNT(*) num_accounts
+FROM  counter_tab;
+*/
+
+-- Q 4 : For the customer that spent the most (in total over their lifetime as a customer) total_amt_usd, 
+-- how many web_events did they have for each channel?
+/*
+WITH inner_table AS 
+(
+	SELECT a.id, a.name, SUM(o.total_amt_usd) tot_spent
+	FROM orders o JOIN accounts a
+		ON a.id = o.account_id
+	GROUP BY a.id, a.name
+	ORDER BY 3 DESC
+	LIMIT 1
+)
+
+SELECT a.name, w.channel, COUNT(*)
+FROM accounts a JOIN web_events w
+	ON a.id = w.account_id AND a.id =  (SELECT id FROM inner_table)
+GROUP BY 1, 2
+ORDER BY 3 DESC;
+*/
+
+-- Q 5 : What is the lifetime average amount spent in terms of total_amt_usd for the top 10 total spending accounts?
+/*
+WITH sub AS 
+(
+	SELECT a.id account_id, a.name account_name, SUM(o.total_amt_usd) total_spent
+	FROM orders o JOIN accounts a 
+		ON a.id = o.account_id
+	GROUP BY 1, 2
+	ORDER BY 3 DESC
+	LIMIT 10
+)
+
+SELECT account_id, account_name, ROUND(AVG(total_spent), 2)
+FROM sub
+GROUP BY 1, 2	
+ORDER BY 3 DESC
+*/
+
+-- Q 6 : What is the lifetime average amount spent in terms of total_amt_usd, 
+-- including only the companies that spent more per order, on average, than the average of all orders.
+
+WITH inner_table AS
+(
+	SELECT AVG(o.total_amt_usd) avg_all
+	FROM orders o
+	JOIN accounts a
+	ON a.id = o.account_id
+),
+
+outer_table AS 
+(
+	SELECT o.account_id, AVG(o.total_amt_usd) avg_amt
+	FROM orders o
+	GROUP BY 1
+	HAVING AVG(o.total_amt_usd) > (SELECT * FROM inner_table)
+)
+
+SELECT AVG(avg_amt)
+FROM outer_table ;
 
 
 
