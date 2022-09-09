@@ -65,6 +65,7 @@ FROM two_groups;
 -- Q 4 : Consider vowels as a, e, i, o, and u. 
 -- What proportion of company names start with a vowel, and what percent start with anything else?
 
+/*
 WITH vowels_consonant_groups AS
 (
 		SELECT name, CASE WHEN LEFT(LOWER(name), 1) IN ('a','e','i','o','u') 
@@ -76,6 +77,7 @@ WITH vowels_consonant_groups AS
 
 SELECT SUM(vowels) total_vowels, SUM(consonants) total_consonants, SUM(vowels) + SUM(consonants) AS population 
 FROM vowels_consonant_groups
+*/
 
 /*
 
@@ -93,6 +95,22 @@ SELECT (total_vowels / population) AS vowel_percent, (total_consonants / populat
 FROM vowels_consonant_percentage
 */
 
+
+/*
+-- Quizzes POSITION & STRPOS
+*/
+
+-- Q 1 : Use the accounts table to create first and last name columns that hold the first and last names for the primary_poc.
+/*
+SELECT LEFT(primary_poc, STRPOS(primary_poc, ' ') -1 ) first_name, 
+   		RIGHT(primary_poc, LENGTH(primary_poc) - STRPOS(primary_poc, ' ')) last_name
+FROM accounts;
+*/
+
+-- Q 2 Now see if you can do the same thing for every rep name in the sales_reps table. Again provide first and last name columns.
+SELECT LEFT(name, STRPOS(name, ' ') -1 ) first_name, 
+   		RIGHT(name, LENGTH(name) - STRPOS(name, ' ')) last_name
+FROM sales_reps;
 
 
 
