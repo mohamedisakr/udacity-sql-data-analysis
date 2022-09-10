@@ -204,9 +204,30 @@ SELECT
 FROM poc_info;
 */
 
+/*--------------------------------
+--- 15. Quiz: COALESCE
+--------------------------------*/
+/*
+SELECT *
+FROM accounts a
+LEFT JOIN orders o
+	ON a.id = o.account_id
+WHERE o.total IS NULL;
+*/
 
+-- Q 2 Use COALESCE to fill in the accounts.id column with the account.id for the NULL value for the table in 1.
+SELECT COALESCE(a.id, a.id) filled_id, a.name, a.website, a.lat, a.long, a.primary_poc, a.sales_rep_id, o.*
+FROM accounts a
+LEFT JOIN orders o
+	ON a.id = o.account_id
+WHERE o.total IS NULL;
 
-
+-- Q 3 : Use COALESCE to fill in the orders.account_id column with the account.id for the NULL value for the table in 1.
+-- SELECT *, COALESCE(o.account_id, -1) AS modified_account_id
+-- FROM accounts a
+-- LEFT JOIN orders o
+-- 	ON a.id = o.account_id
+-- WHERE o.total IS NULL;
 
 
 
