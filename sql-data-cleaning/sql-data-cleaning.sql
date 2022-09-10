@@ -108,9 +108,54 @@ FROM accounts;
 */
 
 -- Q 2 Now see if you can do the same thing for every rep name in the sales_reps table. Again provide first and last name columns.
-SELECT LEFT(name, STRPOS(name, ' ') -1 ) first_name, 
-   		RIGHT(name, LENGTH(name) - STRPOS(name, ' ')) last_name
-FROM sales_reps;
+-- SELECT LEFT(name, STRPOS(name, ' ') -1 ) first_name, 
+--    		RIGHT(name, LENGTH(name) - STRPOS(name, ' ')) last_name
+-- FROM sales_reps;
+
+/*
+-- 09. Quiz: CONCAT
+*/
+
+-- Q 1 & 2 : Each company in the accounts table wants to create an email address for each primary_poc. 
+-- The email address should be the first name of the primary_poc . last name primary_poc @ company name .com
+
+SELECT website, CONCAT(LEFT(primary_poc, STRPOS(primary_poc, ' ') -1 ),'.',
+   		RIGHT(primary_poc, LENGTH(primary_poc) - STRPOS(primary_poc, ' ')), '@', 
+		RIGHT(website, LENGTH(website) - STRPOS(website, '.'))) email
+FROM accounts;
+
+-- Q 3 : We would also like to create an initial password, which they will change after their first log in. 
+-- The first password will be the 
+-- 1. first letter of the primary_poc's first name (lowercase), then 
+-- 2. the last letter of their first name (lowercase), 
+-- 3. the first letter of their last name (lowercase), 
+-- 4. the last letter of their last name (lowercase), 
+-- 5. the number of letters in their first name, 
+-- 6. the number of letters in their last name, and 
+-- 7. then the name of the company they are working with, all capitalized with no spaces.
+
+WITH poc_info AS
+(
+	SELECT UPPER(LEFT(primary_poc, STRPOS(primary_poc, ' ') -1 )) first_name, 
+   			UPPER(RIGHT(primary_poc, LENGTH(primary_poc) - STRPOS(primary_poc, ' '))) last_name, 
+			UPPER(name) company_name
+	FROM accounts
+)
+
+SELECT 
+-- 		first_name,  last_name,
+-- 		LEFT(first_name, 1) first_letter_first_name, -- 1
+-- 		RIGHT(first_name, 1) last_letter_first_name, -- 2
+--    		LEFT(last_name, 1) first_letter_last_name, -- 3
+-- 		RIGHT(last_name, 1) last_letter_last_name, -- 4
+-- 		LENGTH(first_name) length_first_name, -- 5
+-- 		LENGTH(last_name) length_last_name, -- 6
+-- 		company_name,
+		LEFT(first_name, 1) || '' || RIGHT(first_name, 1) || '' || LEFT(last_name, 1) || '' || RIGHT(last_name, 1) || '' ||
+			LENGTH(first_name) || '' || LENGTH(last_name) || '' || translate(company_name, ' ', '') AS initial_password
+FROM poc_info;
+
+
 
 
 
