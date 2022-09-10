@@ -118,6 +118,7 @@ FROM accounts;
 
 -- Q 1 & 2 : Each company in the accounts table wants to create an email address for each primary_poc. 
 -- The email address should be the first name of the primary_poc . last name primary_poc @ company name .com
+/*
 WITH account_info AS
 (
 	SELECT LOWER((LEFT(primary_poc, STRPOS(primary_poc, ' ') -1 ))) first_name, 
@@ -128,6 +129,7 @@ WITH account_info AS
 
 SELECT first_name || '.' || last_name || '@' || company_name || '.' || 'com' AS	 email
 FROM account_info;
+*/
 
 -- another solution with only 1 step
 -- SELECT website, CONCAT(LEFT(primary_poc, STRPOS(primary_poc, ' ') -1 ),'.',
@@ -144,6 +146,41 @@ FROM account_info;
 -- 5. the number of letters in their first name, 
 -- 6. the number of letters in their last name, and 
 -- 7. then the name of the company they are working with, all capitalized with no spaces.
+/*
+-- better solution with 3-steps, 2-CTEs 
+WITH poc_info AS
+(
+	SELECT UPPER(LEFT(primary_poc, STRPOS(primary_poc, ' ') -1 )) first_name, 
+   			UPPER(RIGHT(primary_poc, LENGTH(primary_poc) - STRPOS(primary_poc, ' '))) last_name, 
+			UPPER(TRANSLATE(name, ' ', '')) company_name
+	FROM accounts
+),
+
+initial_concat AS 
+(
+	SELECT 
+		LEFT(first_name, 1) first_letter_first_name, -- 1
+		RIGHT(first_name, 1) last_letter_first_name, -- 2
+		LEFT(last_name, 1) first_letter_last_name, -- 3
+		RIGHT(last_name, 1) last_letter_last_name, -- 4
+		LENGTH(first_name) length_first_name, -- 5
+		LENGTH(last_name) length_last_name, -- 6
+		company_name
+	FROM poc_info
+)
+
+SELECT 
+	first_letter_first_name || '' || -- 1
+	last_letter_first_name || '' || -- 2
+	first_letter_last_name || '' || -- 3
+	last_letter_last_name || '' || -- 4
+	length_first_name || '' || -- 5
+	length_last_name || '' || -- 6
+	company_name AS initial_password
+FROM initial_concat;
+*/
+
+-- another solution with 2 steps
 /*
 WITH poc_info AS
 (
