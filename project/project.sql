@@ -102,7 +102,7 @@ ORDER BY 1 ASC
 -- Write a query that returns the Artist name and total track count of the top 10 rock bands.
 
 -- You will need to use the Genre, Track , Album, and Artist tables.
-
+/*
 SELECT a.artistid, a.name, COUNT(t.trackid)
 FROM artist a JOIN album b
 	ON a.artistid = b.artistid
@@ -114,3 +114,42 @@ WHERE g.genreid = 1
 GROUP BY 1, 2
 ORDER BY 3 DESC
 LIMIT 10
+*/
+
+-- Question 3
+-- First, find which artist has earned the most according to the InvoiceLines?
+
+-- Now use this artist to find which customer spent the most on this artist.
+
+-- Notice, this one is tricky because the Total spent in the Invoice table might not be on a single product, 
+-- so you need to use the InvoiceLine table to find out how many of each product was purchased, 
+-- and then multiply this by the price for each artist.
+
+-- For this query, you will need to use the Invoice, InvoiceLine, Track, Customer, Album, and Artist tables.
+/*
+SELECT trackid, SUM(unitprice * quantity) amount_spent
+FROM invoiceline -- WHERE invoiceid = 1
+GROUP BY 1
+ORDER BY 2 DESC
+*/
+-- SELECT * FROM invoice WHERE invoiceid = 1
+
+-- /*
+SELECT a.artistid, a.name, SUM(il.unitprice * il.quantity) amount_spent
+FROM artist a JOIN album b
+	ON a.artistid = b.artistid
+JOIN track t
+	ON t.albumid = b.albumid
+JOIN invoiceline il
+	ON t.trackid = il.trackid
+JOIN invoice i
+	ON il.invoiceid = i.invoiceid
+GROUP BY 1, 2
+ORDER BY 3 DESC
+LIMIT 10
+-- */
+
+
+
+
+
