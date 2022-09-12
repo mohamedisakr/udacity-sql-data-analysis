@@ -79,7 +79,8 @@ LIMIT 1
 -- Use your query to return the email, first name, last name, and Genre of all Rock Music listeners.
 -- Return your list ordered alphabetically by email address starting with A.
 -- Rock Music ==> genreid = 1
-SELECT c.email, c.firstname, c.lastname, g.name
+/*
+SELECT DISTINCT c.email, c.firstname, c.lastname, g.name
 FROM customer c JOIN invoice i
 	ON c.customerid = i.customerid
 JOIN invoiceline il 
@@ -90,6 +91,26 @@ JOIN genre g
 	ON t.genreid = g.genreid
 WHERE g.genreid = 1	
 ORDER BY 1 ASC
+*/
 
--- SELECT * FROM genre WHERE genreid = 1	
 
+-- Question 2: Who is writing the rock music?
+-- Now that we know that our customers love rock music, 
+-- we can decide which musicians to invite to play at the concert.
+
+-- Let's invite the artists who have written the most rock music in our dataset. 
+-- Write a query that returns the Artist name and total track count of the top 10 rock bands.
+
+-- You will need to use the Genre, Track , Album, and Artist tables.
+
+SELECT a.artistid, a.name, COUNT(t.trackid)
+FROM artist a JOIN album b
+	ON a.artistid = b.artistid
+JOIN track t
+	ON t.albumid = b.albumid
+JOIN genre g
+	ON t.genreid = g.genreid
+WHERE g.genreid = 1	
+GROUP BY 1, 2
+ORDER BY 3 DESC
+LIMIT 10
