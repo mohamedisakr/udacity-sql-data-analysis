@@ -55,13 +55,14 @@ LIMIT 1
 -- Build a query that returns the person who has spent the most money. 
 -- I found the solution by linking the following three: Invoice, InvoiceLine, and Customer tables to 
 -- retrieve this information, but you can probably do it with fewer!
-
-SELECT c.CustomerId, c.FirstName || ' ' || c.LastName AS Full_Name, SUM(Total)
+/*
+SELECT c.CustomerId, c.FirstName || ' ' || c.LastName AS Full_Name, SUM(Total) spent_most
 FROM Customer c JOIN Invoice i
 	ON c.customerid = i.customerid
 GROUP BY 1, 2
 ORDER BY 3 DESC
-
+LIMIT 1
+*/
 
 
 -- SELECT customerid, COUNT(customerid)  -- invoiceid
@@ -70,7 +71,25 @@ ORDER BY 3 DESC
 -- ORDER BY 2 DESC
 
 
+/*--------------------------------------------------------------
+-------------- 06. SQL: Question Set 2 -------------------------
+--------------------------------------------------------------*/
 
+-- Question 1
+-- Use your query to return the email, first name, last name, and Genre of all Rock Music listeners.
+-- Return your list ordered alphabetically by email address starting with A.
+-- Rock Music ==> genreid = 1
+SELECT c.email, c.firstname, c.lastname, g.name
+FROM customer c JOIN invoice i
+	ON c.customerid = i.customerid
+JOIN invoiceline il 
+	ON i.invoiceid = il.invoiceid
+JOIN track t 
+	ON il.trackid = t.trackid
+JOIN genre g 
+	ON t.genreid = g.genreid
+WHERE g.genreid = 1	
+ORDER BY 1 ASC
 
-
+-- SELECT * FROM genre WHERE genreid = 1	
 
