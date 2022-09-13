@@ -81,6 +81,7 @@ FROM customer c JOIN invoice i
 -- WHERE c.customerid = 47
 GROUP BY 1, 3, 4, 5
 ORDER BY 2 DESC
+LIMIT 25
 */
 
 -- other solution
