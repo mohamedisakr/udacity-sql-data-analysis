@@ -48,129 +48,56 @@ WHERE t1.Purchases = t2.MaxPurchases;
 
 -- Question 2: 
 -- Return all the track names that have a song length longer than the average song length. 
--- Though you could perform this with two queries. Imagine you wanted your query to update based 
--- on when new data is put in the database. Therefore, you do not want to hard code the average into your query. 
+-- Though you could perform this with two queries. 
+-- Imagine you wanted your query to update based on when new data is put in the database. 
+-- Therefore, you do not want to hard code the average into your query. 
 -- You only need the Track table to complete this query.
 
 -- Return the Name and Milliseconds for each track. Order by the song length with the longest songs listed first.
+/*
 WITH average_song_length AS 
 (
-	SELECT SUM(milliseconds) / COUNT(trackid)
+	SELECT SUM(milliseconds) / COUNT(trackid) AS avg_milli
 	FROM track
 )	
 
-SELECT name, milliseconds
+SELECT name track_name, milliseconds song_length
 FROM track
-WHERE milliseconds > average_song_length
-/*
-SELECT a.artistid, a.name, COUNT(t.trackid)
-FROM artist a JOIN album b
-	ON a.artistid = b.artistid
-JOIN track t
-	ON t.albumid = b.albumid
-JOIN genre g
-	ON t.genreid = g.genreid
-WHERE g.genreid = 1	
-GROUP BY 1, 2
-ORDER BY 3 DESC
-LIMIT 10
+WHERE milliseconds > (SELECT avg_milli FROM average_song_length)
+ORDER BY milliseconds DESC
 */
+
 
 -- Question 3
--- First, find which artist has earned the most according to the InvoiceLines?
+-- Write a query that determines the customer that has spent the most on music for each country. 
+-- Write a query that returns the country along with the top customer and how much they spent. 
+-- For countries where the top amount spent is shared, provide all customers who spent this amount.
 
--- Now use this artist to find which customer spent the most on this artist.
-
--- Notice, this one is tricky because the Total spent in the Invoice table might not be on a single product, 
--- so you need to use the InvoiceLine table to find out how many of each product was purchased, 
--- and then multiply this by the price for each artist.
-
--- For this query, you will need to use the Invoice, InvoiceLine, Track, Customer, Album, and Artist tables.
-
+-- You should only need to use the Customer and Invoice tables.
 /*
--- First, find which artist has earned the most according to the InvoiceLines?
-SELECT a.artistid, a.name, SUM(il.unitprice * il.quantity) amount_spent
-FROM artist a JOIN album b
-	ON a.artistid = b.artistid
-JOIN track t
-	ON t.albumid = b.albumid
-JOIN invoiceline il
-	ON t.trackid = il.trackid
--- JOIN invoice i
--- 	ON il.invoiceid = i.invoiceid
-GROUP BY 1, 2
-ORDER BY 3 DESC
-LIMIT 10
--- */
-
--- Now use this artist to find which customer spent the most on this artist.
-/*
-WITH most_earned_artist AS 
-(
-	SELECT a.artistid, a.name, SUM(il.unitprice * il.quantity) amount_spent
-	FROM artist a JOIN album b
-		ON a.artistid = b.artistid
-	JOIN track t
-		ON t.albumid = b.albumid
-	JOIN invoiceline il
-		ON t.trackid = il.trackid
-	GROUP BY 1, 2
-	ORDER BY 3 DESC
-	LIMIT 1
-)
-
-SELECT DISTINCT cte.name, cte.amount_spent, c.customerid, c.firstname || ' ' || c.lastname AS full_name --, SUM(il.unitprice * il.quantity) amount_spent
+SELECT c.country, SUM(i.total) total_spent, c.firstname, c.lastname, c.customerid
 FROM customer c JOIN invoice i
-	ON c.customerid = i.customerid
-JOIN invoiceline il 
-	ON i.invoiceid = il.invoiceid
-JOIN track t
-	ON il.trackid = t.trackid
-JOIN album b
-	ON t.albumid = t.albumid
-JOIN artist a
-	ON b.artistid = a.artistid --AND b.artistid = cte.artistid
-JOIN most_earned_artist cte 
-	ON a.artistid = cte.artistid
-GROUP BY 1, 2, 3, 4
-ORDER BY 3 DESC
+	ON c.customerid = i.customerid --AND c.country = i.billingcountry
+-- WHERE c.customerid = 47
+GROUP BY 1, 3, 4, 5
+ORDER BY 2 DESC
 */
 
--- SELECT artistid, name, amount_spent
--- FROM most_earned_artist
-
--- SELECT c.customerid, c.firstname || ' ' || c.lastname AS full_name , SUM(il.unitprice * il.quantity) amount_spent
--- FROM customer c JOIN invoice i
--- 	ON c.customerid = i.customerid
--- JOIN invoiceline il 
--- 	ON i.invoiceid = il.invoiceid
--- GROUP BY 1	
--- ORDER BY 3 DESC
-
--------------------------------------
------- other solution ---------------
--- https://github.com/kev1nch0e/Udacity-Business-Analytics/blob/master/Project%203:%20Query%20a%20Digital%20Music%20Store%20Database/SQL%20Queries/Query4.sql
--------------------------------------
-
+-- other solution
 /*
-WITH most_earned_artist AS 
-(
-	SELECT ar.ArtistId, ar.Name AS artist_name,  SUM(il.UnitPrice * il.Quantity) AS earned
-	FROM artist ar JOIN Album al ON ar.ArtistId = al.ArtistId
-	JOIN Track t				 ON al.AlbumId = t.AlbumId
-	JOIN InvoiceLine il			 ON t.TrackId = il.TrackId
-	GROUP BY 1, 2
-	ORDER BY 3 DESC
-	LIMIT 1
-)
+WITH tab1 AS 
+( 
+	SELECT c.CustomerId, c.FirstName, c.LastName, c.Country, SUM(i.Total) TotalSpent 
+	FROM Customer c JOIN Invoice i ON c.CustomerId = i.CustomerId 
+	GROUP BY c.CustomerId ) 
+SELECT tab1.* 
+FROM tab1 JOIN 
+( SELECT CustomerId, FirstName, LastName, Country, MAX(TotalSpent) AS TotalSpent 
+ FROM tab1 
+ GROUP BY 1,2,3,4-- Country 
+) tab2 
+ ON tab1.Country = tab2.Country 
+ WHERE tab1.TotalSpent = tab2.TotalSpent 
+ ORDER BY Country
+*/ 
 
-SELECT ar.ArtistId,  ar.Name AS artist_name,  g.Name AS genre_type,  SUM(il.UnitPrice * il.Quantity) AS earned
-FROM Artist ar JOIN Album al	  		ON ar.ArtistId = al.ArtistId
-				JOIN Track t	  		ON al.AlbumId = t.AlbumId
-				JOIN Genre g			ON t.GenreId = g.GenreId
-				JOIN InvoiceLine il		ON t.TrackId = il.TrackId
-WHERE ar.Name = (SELECT  artist_name
-				 FROM most_earned_artist)
-GROUP BY 1, 2, 3
-ORDER BY 4 DESC;
-*/
