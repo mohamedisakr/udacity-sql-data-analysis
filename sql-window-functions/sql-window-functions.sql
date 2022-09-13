@@ -24,11 +24,34 @@ FROM orders
 -- Your final table should have three columns: 
 -- One with the amount being added for each row, one for the truncated date, 
 -- and a final column with the running total within each year.
-
+/*
 SELECT standard_amt_usd, 
 		DATE_TRUNC('year', occurred_at) AS order_year,
 		SUM(standard_amt_usd) OVER (PARTITION BY DATE_TRUNC('year', occurred_at) ORDER BY occurred_at) AS running_total		
 FROM orders
+*/
+
+-- SELECT id, account_id, occurred_at, ROW_NUMBER() OVER (ORDER BY id) AS row_num
+-- FROM orders
+
+-- SELECT id, account_id, occurred_at, ROW_NUMBER() OVER (ORDER BY occurred_at) AS row_num
+-- FROM orders
+
+-- SELECT id, account_id, occurred_at, 
+-- 		ROW_NUMBER() OVER (PARTITION BY account_id ORDER BY occurred_at) AS row_num
+-- FROM orders
+
+-- SELECT id, account_id, occurred_at, 
+-- 		DATE_TRUNC('month', occurred_at) AS month,
+-- 		RANK() OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('month', occurred_at)) AS row_num
+-- FROM orders
+
+SELECT id, account_id, occurred_at, 
+		DATE_TRUNC('month', occurred_at) AS month,
+		DENSE_RANK() OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('month', occurred_at)) AS row_num
+FROM orders
+
+
 
 
 
